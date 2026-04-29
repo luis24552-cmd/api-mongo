@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CRUD Usuarios</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        input {
+            margin: 5px;
+            padding: 8px;
+        }
+        button {
+            padding: 8px 12px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        li {
+            margin: 5px 0;
+            background: white;
+            padding: 8px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>CRUD Usuarios</h1>
+
+<input id="nombre" placeholder="Nombre">
+<input id="edad" placeholder="Edad" type="number">
+<button onclick="guardar()">Guardar</button>
+
+<h2>Lista de usuarios</h2>
+<ul id="lista"></ul>
+
+<script>
+
+// 🔗 🔥 CAMBIA ESTA URL CUANDO SUBAS A RENDER
+// LOCAL:
+const API = "http://localhost:3000/usuarios";
+
+// INTERNET (ejemplo):
+// const API = "https://tu-api.onrender.com/usuarios";
+
+
+// 🔹 GUARDAR USUARIO
+async function guardar() {
+    const nombre = document.getElementById("nombre").value;
+    const edad = document.getElementById("edad").value;
+
+    if (!nombre || !edad) {
+        alert("Llena todos los campos");
+        return;
+    }
+
+    await fetch(API, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            nombre: nombre,
+            edad: Number(edad)
+        })
+    });
+
+    document.getElementById("nombre").value = "";
+    document.getElementById("edad").value = "";
+
+    cargar();
+}
+
+
+// 🔹 CARGAR USUARIOS
+async function cargar() {
+    const res = await fetch(API);
+    const data = await res.json();
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    data.forEach(u => {
+        lista.innerHTML += `
+            <li>
+                ${u.nombre} - ${u.edad}
+                <button onclick="eliminar('${u._id}')">❌</button>
+            </li>
+        `;
+    });
+}
+
+
+// 🔹 ELIMINAR USUARIO
+async function eliminar(id) {
+    await fetch(API + "/" + id, {
+        method: "DELETE"
+    });
+
+    cargar();
+}
+
+
+// 🔄 CARGAR AL INICIAR
+cargar();
+
+</script>
+
+</body>
+</html>
