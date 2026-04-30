@@ -1,114 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>CRUD Usuarios</title>
-    <style>
-        body {
-            font-family: Arial;
-            padding: 20px;
-            background: #f4f4f4;
-        }
-        h1 {
-            color: #333;
-        }
-        input {
-            margin: 5px;
-            padding: 8px;
-        }
-        button {
-            padding: 8px 12px;
-            margin: 5px;
-            cursor: pointer;
-        }
-        li {
-            margin: 5px 0;
-            background: white;
-            padding: 8px;
-            border-radius: 5px;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Usuarios</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 20px;
+}
+
+form {
+    margin: 20px;
+}
+
+input {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 8px;
+    border: none;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background: #22c55e;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #16a34a;
+}
+
+table {
+    margin: auto;
+    border-collapse: collapse;
+    width: 70%;
+    background: #1e293b;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #334155;
+}
+
+th {
+    background: #334155;
+}
+
+.delete {
+    background: #ef4444;
+}
+
+.delete:hover {
+    background: #dc2626;
+}
+</style>
+
 </head>
 <body>
 
-<h1>CRUD Usuarios</h1>
+<h1>👤 CRUD Usuarios</h1>
 
-<input id="nombre" placeholder="Nombre">
-<input id="edad" placeholder="Edad" type="number">
-<button onclick="guardar()">Guardar</button>
+<form onsubmit="agregarUsuario(event)">
+    <input type="text" id="nombre" placeholder="Nombre" required>
+    <input type="number" id="edad" placeholder="Edad" required>
+    <button>Agregar</button>
+</form>
 
-<h2>Lista de usuarios</h2>
-<ul id="lista"></ul>
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Edad</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="tabla"></tbody>
+</table>
 
 <script>
+const API = "https://api-mongo-0xfl.onrender.com/usuarios";
 
-// 🔗 🔥 CAMBIA ESTA URL CUANDO SUBAS A RENDER
-// LOCAL:
-const API = "http://localhost:3000/usuarios";
-
-// INTERNET (ejemplo):
-// const API = "https://tu-api.onrender.com/usuarios";
-
-
-// 🔹 GUARDAR USUARIO
-async function guardar() {
-    const nombre = document.getElementById("nombre").value;
-    const edad = document.getElementById("edad").value;
-
-    if (!nombre || !edad) {
-        alert("Llena todos los campos");
-        return;
-    }
-
-    await fetch(API, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            nombre: nombre,
-            edad: Number(edad)
-        })
-    });
-
-    document.getElementById("nombre").value = "";
-    document.getElementById("edad").value = "";
-
-    cargar();
-}
-
-
-// 🔹 CARGAR USUARIOS
-async function cargar() {
+// 🔹 Cargar usuarios
+async function cargarUsuarios() {
     const res = await fetch(API);
     const data = await res.json();
 
-    const lista = document.getElementById("lista");
-    lista.innerHTML = "";
+    const tabla = document.getElementById("tabla");
+    tabla.innerHTML = "";
 
     data.forEach(u => {
-        lista.innerHTML += `
-            <li>
-                ${u.nombre} - ${u.edad}
-                <button onclick="eliminar('${u._id}')">❌</button>
-            </li>
+        tabla.innerHTML += `
+            <tr>
+                <td>${u.nombre}</td>
+                <td>${u.edad}</td>
+                <td>
+                    <button class="delete" onclick="eliminar('${u._id}')">Eliminar</button>
+                </td>
+            </tr>
         `;
     });
 }
 
+// 🔹 Agregar
+async function agregarUsuario(e) {
+    e.preventDefault();
 
-// 🔹 ELIMINAR USUARIO
+    const nombre = document.getElementById("nombre").value;
+    const edad = document.getElementById("edad").value;
+
+    await fetch(API, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ nombre, edad })
+    });
+
+    cargarUsuarios();
+}
+
+// 🔹 Eliminar
 async function eliminar(id) {
     await fetch(API + "/" + id, {
         method: "DELETE"
     });
 
-    cargar();
+    cargarUsuarios();
 }
 
-
-// 🔄 CARGAR AL INICIAR
-cargar();
-
+// 🚀 iniciar
+cargarUsuarios();
 </script>
 
 </body>
